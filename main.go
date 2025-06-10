@@ -14,11 +14,6 @@ var numericKeyboard = tgbotapi.NewReplyKeyboard(
         tgbotapi.NewKeyboardButton("2"),
         tgbotapi.NewKeyboardButton("3"),
     ),
-    tgbotapi.NewKeyboardButtonRow(
-        tgbotapi.NewKeyboardButton("4"),
-        tgbotapi.NewKeyboardButton("5"),
-        tgbotapi.NewKeyboardButton("6"),
-    ),
 )
 
 func main() {
@@ -58,6 +53,11 @@ msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
 switch update.Message.Text {
         case "Open":
             msg.ReplyMarkup = numericKeyboard
+		case "1", "2", "3":
+            msg.Text = "You selected " + update.Message.Text
+					case "Cancel":
+            msg.Text = "Cancelled"
+            msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)	
         case "Close":
             msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
         }
