@@ -8,16 +8,31 @@ import (
 	"github.com/joho/godotenv"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
-var numericKeyboard = tgbotapi.NewReplyKeyboard(
-    tgbotapi.NewKeyboardButtonRow(
-        tgbotapi.NewKeyboardButton("1"),
-        tgbotapi.NewKeyboardButton("2"),
-        tgbotapi.NewKeyboardButton("3"),
-    ),
-)
+// var numericKeyboard = tgbotapi.NewReplyKeyboard(
+//     tgbotapi.NewKeyboardButtonRow(
+//         tgbotapi.NewKeyboardButton("1"),
+//         tgbotapi.NewKeyboardButton("2"),
+//         tgbotapi.NewKeyboardButton("3"),
+//     ),
+// )
 func test() string {
 	return "Upload a picture to extract the text"
 }
+
+
+var numericKeyboard = tgbotapi.NewInlineKeyboardMarkup(
+    tgbotapi.NewInlineKeyboardRow(
+        tgbotapi.NewInlineKeyboardButtonURL("1.com", "http://1.com"),
+        tgbotapi.NewInlineKeyboardButtonData("2", "2"),
+        tgbotapi.NewInlineKeyboardButtonData("3", "3"),
+    ),
+    tgbotapi.NewInlineKeyboardRow(
+        tgbotapi.NewInlineKeyboardButtonData("4", "4"),
+        tgbotapi.NewInlineKeyboardButtonData("5", "5"),
+        tgbotapi.NewInlineKeyboardButtonData("6", "6"),
+    ),
+)
+
 
 func main() {
 	// Load .env file
@@ -46,33 +61,36 @@ func main() {
 
 	updates := bot.GetUpdatesChan(u)
 
-	for update := range updates {
-        if update.Message == nil { // ignore any non-Message updates
-            continue
-        }
-msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
+for update := range updates {
+    if update.Message != nil {
+        msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
 
-        // Extract the command from the Message.
-switch update.Message.Text {
+        switch update.Message.Text {
         case "Open":
             msg.ReplyMarkup = numericKeyboard
-		case "1", "2" :
-            msg.Text = "You selected " + update.Message.Text
-
-		case "3":
-			msg.Text = test()
-
-					case "Cancel":
-            msg.Text = "Cancelled"
-            msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)	
-        case "Close":
-            msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
         }
 
-        if _, err := bot.Send(msg); err != nil {
-            log.Panic(err)
+        // Send the message.
+        if _, err = bot.Send(msg); err != nil {
+            panic(err)
         }
     }
 
-	// Add your bot logic here
+    if update.CallbackQuery != nil {
+        // Respond to the callback query, telling Telegram to show the user
+        // a message with the data received.
+        callback := tgbotapi.NewCallback(update.CallbackQuery.ID, update.CallbackQuery.Data)
+        if _, err := bot.Request(callback); err != nil {
+            panic(err)
+        }
+
+        // And finally, send a message containing the data received.
+        msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Data)
+        if _, err := bot.Send(msg); err != nil {
+            panic(err)
+        }
+    }
+}
+
+
 }
