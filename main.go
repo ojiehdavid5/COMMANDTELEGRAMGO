@@ -15,6 +15,9 @@ var numericKeyboard = tgbotapi.NewReplyKeyboard(
         tgbotapi.NewKeyboardButton("3"),
     ),
 )
+func test() string {
+	return "Upload a picture to extract the text"
+}
 
 func main() {
 	// Load .env file
@@ -53,8 +56,12 @@ msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
 switch update.Message.Text {
         case "Open":
             msg.ReplyMarkup = numericKeyboard
-		case "1", "2", "3":
+		case "1", "2" :
             msg.Text = "You selected " + update.Message.Text
+
+		case "3":
+			msg.Text = test()
+
 					case "Cancel":
             msg.Text = "Cancelled"
             msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)	
